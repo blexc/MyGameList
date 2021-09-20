@@ -1,0 +1,93 @@
+body {
+	background-color: #FFFFF0;
+	padding: 5px;
+}
+
+.Title {
+	text-align: center;
+	border-style: ridge;
+	border-width: 20px 20px;
+}
+
+.CurrentUser {
+	text-align: left;
+	border-style: ridge;
+	border-width: 20px 20px;
+	width: 400px;
+}
+
+.AddGame {
+	text-align: left;
+}
+
+#largeInput {
+	width: 300px;
+	height: 100px;
+	resize: horizontal;
+	word-wrap: break-word;
+	vertical-align: text-top;
+	overflow: auto;
+}
+
+.AddUser {
+	text-align: left;
+}
+
+#red {
+	color: red;
+}
+
+.UserList {
+	text-align: left;
+}
+
+.Users {
+	text-align: center;
+}
+
+.Users li {
+	list-style-type: none;
+	text-align: left;
+	padding: 2px 25px;
+}
+
+#noliststyle {
+	list-style-type: none;
+}
+
+#largeCell{
+	width: 75%;
+}
+
+table, th, td {
+	border: 1px solid black;
+}
+
+th, td {
+	width: 500px;
+	text-align: center;
+}
+
+#deletebutton{
+	width: 10px;
+}
+
+#date {
+	width: 20%;
+}
+
+#score{
+	width: 10px;
+}
+
+#review{
+	width: 500px;
+}
+
+#first {
+	background-color: lightgray;
+}
+
+#notfirst {
+	background-color: white;
+}

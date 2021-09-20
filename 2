@@ -1,0 +1,370 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import mario64 from './mario64.jpg';
+import touhou from './th4.jpg';
+import rabiribi from './rabiribi.jpg';
+import kirby from './kirby.jpg';
+import './mygamelist.css';
+
+class Title extends React.Component {
+	render(){
+		return (
+			<div className = "Title">
+				<h1>My Game List</h1>
+				<img src={mario64} alt="mario 64"/>
+				<img src={touhou} alt="th4"/>
+				<img src={rabiribi} alt="rabi ribi"/>
+				<img src={kirby} alt="kirby" width="300px"/>
+			</div>
+		);
+	}
+}
+
+class CurrentUser extends React.Component {
+	render(){
+		let msg;
+		if (this.props.currentUser == ""){
+			msg = "Create an account or log in.;
+		} else {
+			msg = "Logged In As: " + <u>{this.props.currentUser}</u>;
+		}
+
+		return (
+			<div className = "CurrentUser">
+				<h2>{msg}</h2>
+			</div>
+		);
+	}
+}
+
+class AddUser extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			user: '',
+			pass: '',
+			errorMsg: '',
+		};
+
+		this.handleSubmit = this.handleSubmit.bind(this);
+		this.handleUserChange = this.handleUserChange.bind(this);
+		this.handlePassChange = this.handlePassChange.bind(this);
+	}
+
+	// make sure user is in the list and matches the password
+	// or make sure the user entered is unique, to create a new one
+	handleSubmit(event){ 
+		event.preventDefault();
+		var uniqueUser = true;
+
+		// error checking...
+		if (this.state.pass === '' || this.state.user === ''){
+			this.setState({ errorMsg: 'ERROR: username and password cannot be blank.'});
+			return;
+		}
+
+		for (let i=0; i < this.state.user.length; i++){
+			if (this.state.user[i] === ' '){
+				this.setState({ errorMsg: 'ERROR: can not have spaces in username.'});
+				return;
+			}
+		}
+
+		for (let i=0; i < this.state.pass.length; i++){
+			if (this.state.pass[i] === ' '){
+				this.setState({ errorMsg: 'ERROR: can not have spaces in password.'});
+				return;
+			}
+		}
+
+		// scan list, either log in or create new account
+		for (let i=0; i < this.props.list.length; i++){
+			if (this.props.list[i].username === this.state.user){
+				uniqueUser = false;
+				// login
+				if (this.props.list[i].pass === this.state.pass){
+					this.setState({ errorMsg: ''});
+					this.props.handleLogin(this.state.user);
+					return;
+				}
+			}
+		}
+		
+		// create new account
+		if (uniqueUser){
+			this.setState({ errorMsg: ''});
+			this.props.handleAddUser(this.state.user, this.state.pass); 
+		}
+		else{
+			this.setState({ errorMsg: 'ERROR: either username already taken or incorrect password.'});
+		}
+	}
+	handleUserChange(event){ this.setState({ user: event.target.value }); }
+	handlePassChange(event){ this.setState({ pass: event.target.value }); }
+
+	render(){
+		return (
+			<div className = "AddUser">
+				<h2>Login/ create an account:</h2>
+				<p id="red"><i>{this.state.errorMsg}</i></p>
+				<form onSubmit={this.handleSubmit}>
+					<label>
+						Username: <br />
+						<input type="text" name="username" required={true} onChange={this.handleUserChange}/> <br /> <br />
+						Password: <br />
+						<input type="password" name="password" required={true} onChange={this.handlePassChange}/> <br />
+					</label>	
+					<br />
+					<input type="submit" name="Submit" />
+				</form>
+			</div>
+		);
+	}
+}
+
+// TODO
+class AddGame extends React.Component {
+	render(){
+		return (
+			<div className = "AddGame">
+				<h2>Add a new game:</h2>
+				<form>
+					<label>
+						Game name: <input type="text" name="gamename" required={true} />
+					</label> <br /><br />
+					<label>
+						Score: <input type="number" name="score" min="1" max="10" required={true} /> /10
+					</label> <br /><br />
+					<label>
+						Date Finished:: <input type="date" name="datefinished" required={true} />
+					</label> <br /><br />
+					<label>
+						Review: <textarea id="largeInput" type="text" name="review" maxLength="65500" resizeable="true"/>
+					</label> <br /><br />
+					<input type="submit" name="Submit"/>
+				</form>
+			</div>
+		);
+	}
+}
+
+// TODO css the buttons
+class Users extends React.Component {
+	onClick(name){
+		this.props.handleUserClick(name.user);
+	}
+
+	render(){
+		var users = [];
+		for (let i=0; i < this.props.list.length; i++){
+			let unique = true;
+			for (let j=0; j < users.length; j++){
+				if (this.props.list[i].username === users[j]){
+					unique = false;
+				}
+			}
+				
+			if (unique === true){
+				users.push(this.props.list[i].username);
+			}
+		}
+
+		return (
+			<div className = "Users">
+				<h2>Users:</h2>
+				<ul>
+					{users.map((user, index) =>
+						<li key={index}><button onClick={() => this.onClick({user})}>
+							{user}
+						</button></li>
+					)}
+				</ul>
+			</div>
+		);
+	}
+}
+
+class UserList extends React.Component {
+	render(){
+		const currentUserText = this.props.currentUser + "'s List";
+		var userList = [];
+
+		for (let i=0; i < this.props.list.length; i++){
+			if (this.props.list[i].username === this.props.currentUser){
+
+				var date = this.props.list[i].finishDate;
+				date = date.slice(0, 10);
+
+				userList.push({
+					id: this.props.list[i].id,
+					gameName: this.props.list[i].gameName,
+					gameScore: this.props.list[i].gameScore,
+					finishDate: date,
+					review: this.props.list[i].review,
+				});
+			}
+		}
+
+		return (
+			<div className = "UserList">
+				<h2>{currentUserText}</h2>
+				<table><tbody>
+					<tr id="first">
+						<th>Game Name</th>
+						<th id="score">Score</th>
+						<th>Date Completed</th>
+						<th>Review</th>
+					</tr>
+					{userList.map(game =>
+						<tr id="notfirst" key={game.id}>
+							<td>{game.gameName}</td>
+							<td id="score">{game.gameScore}</td>
+							<td>{game.finishDate}</td>
+							<td><i>{game.review}</i></td>
+						</tr>
+					)}
+				</tbody></table>
+			</div>
+		);
+	}
+}
+
+class MyGameList extends React.Component {
+	_isMounted = false;
+
+	constructor(props) {
+		super(props);
+		this.state = {
+			list: [],
+			loggedInUser: "",
+			userViewing: "",
+		};
+		this.handleUserClick = this.handleUserClick.bind(this);
+		this.handleLogin = this.handleLogin.bind(this);
+	}
+
+	// creates the database
+	startDB(){
+		fetch('/initdb')
+			.then(response => {
+				if (response.status !== 200) {
+					console.log('initdb fetch problem: ' + response.status);
+					return;
+				}
+			})
+		.catch(err => {
+			console.log('allstats fetch error :-S', err);
+		})
+	}
+
+	// loads the data into list
+	loadDB(){
+		fetch('/loadall')
+			.then(response => {
+				if (response.status !== 200) {
+					console.log('loadall fetch problem: ' + response.status);
+					return;
+				}
+				response.json()
+				.then(loadall => {
+					if (this._isMounted){
+						this.setState({list: loadall});
+					}
+				});
+			})
+		.catch(err => {
+			console.log('allstats fetch error :-S', err);
+		})
+	}
+
+	// assigns stats to db stats during loadup
+	componentDidMount() {
+		this._isMounted = true;
+		this.startDB();
+		this.loadDB();
+	}
+
+	// to ensure no memory leaks
+	componentWillUnmount() {
+		this._isMounted = false;
+	}
+
+	// look at a new user list (doesn't change who's logged in!)
+	handleUserClick(name) {
+		this.setState({
+			userViewing: name,
+		});
+	}
+
+	// TODO registers a new user account
+	handleAddUser(user, pass){
+		fetch('/createuser/name/' + user + '/pass/' + pass)
+			.then(response => {
+				if (response.status !== 200){
+					console.log('error creating user: '+ response.status);
+					return;
+				}
+				console.log("creating user\nuser: " + user + "\npass: " + pass);
+				response.json()
+				.then(createuser => {
+					this.loadDB();
+					this.setState({
+						loggedInUser: user,
+						userViewing: user,
+					});
+				});
+			})
+		.catch(err => {
+			console.log('createuser fetch error :-S', err);
+		})
+	}
+
+	// login
+	handleLogin(user){
+		this.setState({
+			loggedInUser: user,
+			userViewing: user,
+		});
+	}
+
+	render() {
+		return (
+			<div>
+				<Title/>
+				<br/ >
+				<CurrentUser currentUser={this.state.loggedInUser}/>
+				<br/ >
+				<table><tbody>
+					<tr>
+						<td><AddUser
+							handleAddUser={this.handleAddUser}
+							handleLogin={this.handleLogin}
+							list={this.state.list}
+						/></td>
+						<td><AddGame/></td>
+					</tr>
+				</tbody></table>
+				<br/ >
+				<table><tbody>
+					<tr>
+						<td id="largeCell"> 
+							<UserList
+								list={this.state.list}
+								currentUser={this.state.userViewing}
+							/>
+						</td>
+						<td>
+							<Users
+								list={this.state.list}
+								handleUserClick={this.handleUserClick}
+							/>
+						</td>
+					</tr>
+				</tbody></table>
+			</div>
+		);
+	}
+}
+
+ReactDOM.render( <MyGameList />, document.getElementById('root'));
+export default MyGameList;
